@@ -6,12 +6,16 @@ import { Loader } from './Loader/Loader';
 import { Searchbar } from './Searchbar/Searchbar';
 import api from './services/api';
 
+const INITIAL_STATE = {
+  isLoading: false,
+  photos: [],
+  page: 1,
+  query: '',
+};
+
 export class App extends Component {
   state = {
-    isLoading: false,
-    photos: [],
-    page: 1,
-    query: '',
+    ...INITIAL_STATE,
   };
 
   onSubmit = e => {
@@ -30,14 +34,22 @@ export class App extends Component {
     });
   };
 
-  async componentDidUpdate(prevProps, prevState) {
-    if (prevState !== this.state) {
-      const response = await api(this.state.query, this.state.page);
-      this.setState(prevS => {
-        return { photos: response.data.hits };
-      });
-    }
-  }
+  // async componentDidUpdate(prevProps, prevState) {
+  //   if (prevState !== this.state) {
+  //     this.setState(prevS => {
+  //       return {
+  //         isLoading: true,
+  //       };
+  //     });
+  //     const response = await api(this.state.query, this.state.page);
+  //     this.setState(prevS => {
+  //       return {
+  //         photos: response.data.hits,
+  //         isLoading: false,
+  //       };
+  //     });
+  //   }
+  // }
 
   render() {
     return (
@@ -48,7 +60,9 @@ export class App extends Component {
         ) : (
           <ImageGallery photos={this.state.photos} />
         )}
-        <Button onClick={this.onClickButton} />
+        {this.state.photos.length > 0 && (
+          <Button onClick={this.onClickButton} />
+        )}
 
         {/* <Modal /> */}
       </div>
