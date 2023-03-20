@@ -7,7 +7,7 @@ const ESC_KEY = 27;
 export class Modal extends Component {
   static propTypes = {
     url: PropTypes.string.isRequired,
-    modalClose: PropTypes.func.isRequired,
+    close: PropTypes.func.isRequired,
   };
 
   handleKey = e => {
