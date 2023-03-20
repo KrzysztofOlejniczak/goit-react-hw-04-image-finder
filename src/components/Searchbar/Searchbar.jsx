@@ -7,11 +7,17 @@ export class Searchbar extends Component {
     onSubmit: PropTypes.func.isRequired,
   };
 
-  render() {
+  search = e => {
+    e.preventDefault();
+    const form = e.currentTarget;
     const { onSubmit } = this.props;
+    onSubmit(form[1].value, 1);
+  };
+
+  render() {
     return (
       <header className={styles.Searchbar}>
-        <form className={styles.SearchForm} onSubmit={onSubmit}>
+        <form className={styles.SearchForm} onSubmit={this.search}>
           <button type="submit" className={styles['SearchForm-button']}>
             <span className={styles['SearchForm-button-label']}>Search</span>
           </button>

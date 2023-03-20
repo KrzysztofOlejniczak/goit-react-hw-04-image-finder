@@ -2,7 +2,7 @@ import { Component } from 'react';
 import { Button } from './Button/Button';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Loader } from './Loader/Loader';
-// import { Modal } from './Modal/Modal';
+import { Modal } from './Modal/Modal';
 import { Searchbar } from './Searchbar/Searchbar';
 import api from './services/api';
 
@@ -11,6 +11,7 @@ const INITIAL_STATE = {
   photos: [],
   page: 1,
   query: '',
+  modal: '',
 };
 
 export class App extends Component {
@@ -18,53 +19,73 @@ export class App extends Component {
     ...INITIAL_STATE,
   };
 
-  onSubmit = e => {
-    e.preventDefault();
-    const form = e.currentTarget;
+  searchImg = async (query, page) => {
+    this.setState({ isLoading: true });
+    const response = await api(query, page);
+    let photos = [];
+    response.data.hits.forEach(photo => {
+      photos.push({
+        id: photo.id,
+        webformatURL: photo.webformatURL,
+        largeImageURL: photo.largeImageURL,
+      });
+    });
+    if (page === 1) {
+      const maxPage = Math.ceil(
+        response.data.totalHits / response.data.hits.length
+      );
+      this.setState(prevS => {
+        return {
+          query,
+          photos,
+          page,
+          maxPage,
+          isLoading: false,
+        };
+      });
+    } else {
+      this.setState(prevS => {
+        return {
+          query,
+          photos: [...this.state.photos, ...photos],
+          page,
+          isLoading: false,
+        };
+      });
+    }
+  };
+
+  modalOpen = url => {
     this.setState(prevS => {
       return {
-        query: form[1].value,
+        modal: url,
       };
     });
   };
 
-  onClickButton = () => {
+  modalClose = url => {
     this.setState(prevS => {
-      return { page: prevS.page + 1 };
+      return {
+        modal: '',
+      };
     });
   };
 
-  // async componentDidUpdate(prevProps, prevState) {
-  //   if (prevState !== this.state) {
-  //     this.setState(prevS => {
-  //       return {
-  //         isLoading: true,
-  //       };
-  //     });
-  //     const response = await api(this.state.query, this.state.page);
-  //     this.setState(prevS => {
-  //       return {
-  //         photos: response.data.hits,
-  //         isLoading: false,
-  //       };
-  //     });
-  //   }
-  // }
-
   render() {
+    const { page, maxPage, query, photos, isLoading, modal } = this.state;
     return (
       <div className=".app">
-        <Searchbar onSubmit={this.onSubmit} />
-        {this.state.isLoading ? (
-          <Loader />
-        ) : (
-          <ImageGallery photos={this.state.photos} />
-        )}
-        {this.state.photos.length > 0 && (
-          <Button onClick={this.onClickButton} />
+        <Searchbar onSubmit={this.searchImg} />
+        <ImageGallery photos={photos} modalOpen={this.modalOpen} />
+        {isLoading && <Loader />}
+        {photos.length > 0 && !isLoading && page < maxPage && (
+          <Button
+            page={page}
+            onClick={nextPage => this.searchImg(query, nextPage)}
+          />
         )}
 
-        {/* <Modal /> */}
+        {modal.length > 0 && <Modal url={modal} close={this.modalClose} />}
       </div>
     );
   }
