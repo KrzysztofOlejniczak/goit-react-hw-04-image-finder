@@ -74,7 +74,7 @@ export class App extends Component {
   render() {
     const { page, maxPage, query, photos, isLoading, modal } = this.state;
     return (
-      <div className=".app">
+      <div className="app">
         <Searchbar onSubmit={this.searchImg} />
         <ImageGallery photos={photos} modalOpen={this.modalOpen} />
         {isLoading && <Loader />}
