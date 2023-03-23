@@ -1,9 +1,9 @@
-import { Component } from 'react';
-import { Button } from './Button/Button';
-import { ImageGallery } from './ImageGallery/ImageGallery';
-import { Loader } from './Loader/Loader';
-import { Modal } from './Modal/Modal';
-import { Searchbar } from './Searchbar/Searchbar';
+import { useState } from 'react';
+import Button from './Button/Button';
+import ImageGallery from './ImageGallery/ImageGallery';
+import Loader from './Loader/Loader';
+import Modal from './Modal/Modal';
+import Searchbar from './Searchbar/Searchbar';
 import api from './services/api';
 
 const INITIAL_STATE = {
@@ -14,17 +14,22 @@ const INITIAL_STATE = {
   modal: '',
 };
 
-export class App extends Component {
-  state = {
-    ...INITIAL_STATE,
-  };
+const App = () => {
+  const [page, setPage] = useState(INITIAL_STATE.page);
+  const [maxPage, setMaxPage] = useState(0);
+  const [query, setQuery] = useState(INITIAL_STATE.query);
+  const [photos, setPhotos] = useState(INITIAL_STATE.photos);
+  const [isLoading, setIsLoading] = useState(INITIAL_STATE.isLoading);
+  const [modal, setModal] = useState(INITIAL_STATE.modal);
 
-  searchImg = async (query, page) => {
-    this.setState({ isLoading: true });
+  // const { page, maxPage, query, photos, isLoading, modal } = this.state;
+
+  const searchImg = async (query, page) => {
+    setIsLoading(true);
     const response = await api(query, page);
-    let photos = [];
+    let photosFromApi = [];
     response.data.hits.forEach(photo => {
-      photos.push({
+      photosFromApi.push({
         id: photo.id,
         webformatURL: photo.webformatURL,
         largeImageURL: photo.largeImageURL,
@@ -34,59 +39,39 @@ export class App extends Component {
       const maxPage = Math.ceil(
         response.data.totalHits / response.data.hits.length
       );
-      this.setState(prevS => {
-        return {
-          query,
-          photos,
-          page,
-          maxPage,
-          isLoading: false,
-        };
-      });
+      setQuery(query);
+      setPhotos(photosFromApi);
+      setPage(page);
+      setMaxPage(maxPage);
+      setIsLoading(false);
     } else {
-      this.setState(prevS => {
-        return {
-          query,
-          photos: [...this.state.photos, ...photos],
-          page,
-          isLoading: false,
-        };
-      });
+      setQuery(query);
+      setPhotos([...photos, ...photosFromApi]);
+      setPage(page);
+      setIsLoading(false);
     }
   };
 
-  modalOpen = url => {
-    this.setState(prevS => {
-      return {
-        modal: url,
-      };
-    });
+  const modalOpen = url => {
+    setModal(url);
   };
 
-  modalClose = url => {
-    this.setState(prevS => {
-      return {
-        modal: '',
-      };
-    });
+  const modalClose = url => {
+    setModal(INITIAL_STATE.modal);
   };
 
-  render() {
-    const { page, maxPage, query, photos, isLoading, modal } = this.state;
-    return (
-      <div className="app">
-        <Searchbar onSubmit={this.searchImg} />
-        <ImageGallery photos={photos} modalOpen={this.modalOpen} />
-        {isLoading && <Loader />}
-        {photos.length > 0 && !isLoading && page < maxPage && (
-          <Button
-            page={page}
-            onClick={nextPage => this.searchImg(query, nextPage)}
-          />
-        )}
+  return (
+    <div className="app">
+      <Searchbar onSubmit={searchImg} />
+      <ImageGallery photos={photos} modalOpen={modalOpen} />
+      {isLoading && <Loader />}
+      {photos.length > 0 && page < maxPage && (
+        <Button page={page} onClick={nextPage => searchImg(query, nextPage)} />
+      )}
 
-        {modal.length > 0 && <Modal url={modal} close={this.modalClose} />}
-      </div>
-    );
-  }
-}
+      {modal.length > 0 && <Modal url={modal} close={modalClose} />}
+    </div>
+  );
+};
+
+export default App;
