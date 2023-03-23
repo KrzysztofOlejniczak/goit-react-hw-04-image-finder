@@ -10,19 +10,18 @@ const INITIAL_STATE = {
   isLoading: false,
   photos: [],
   page: 1,
+  maxPage: 0,
   query: '',
   modal: '',
 };
 
 const App = () => {
   const [page, setPage] = useState(INITIAL_STATE.page);
-  const [maxPage, setMaxPage] = useState(0);
+  const [maxPage, setMaxPage] = useState(INITIAL_STATE.maxPage);
   const [query, setQuery] = useState(INITIAL_STATE.query);
   const [photos, setPhotos] = useState(INITIAL_STATE.photos);
   const [isLoading, setIsLoading] = useState(INITIAL_STATE.isLoading);
   const [modal, setModal] = useState(INITIAL_STATE.modal);
-
-  // const { page, maxPage, query, photos, isLoading, modal } = this.state;
 
   const searchImg = async (query, page) => {
     setIsLoading(true);
