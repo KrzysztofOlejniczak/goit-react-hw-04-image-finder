@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const KEY = process.env.REACT_APP_API_KEY;
+const KEY = '32245226-f27b1af2cde9216d3910bfcd8';
 axios.defaults.baseURL = 'https://pixabay.com/api/';
 
 const searchParams = new URLSearchParams({
